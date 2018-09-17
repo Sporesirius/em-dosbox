@@ -30,6 +30,8 @@ dosbox_LDFLAGS+=--memory-init-file 0
 endif
 if WEBASSEMBLY
 dosbox_LDFLAGS+=-s WASM=1
+else
+dosbox_LDFLAGS+=-s WASM=0
 endif
 endif
 
