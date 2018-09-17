@@ -5,6 +5,7 @@ AC_CONFIG_SRCDIR(README)
 
 dnl Check for Emscripten is done early because it needs to change host triplet.
 AS_CASE([$CC],
+        [*emcc.py], [enable_emscripten="yes"],
         [*emcc], [enable_emscripten="yes"],
         [enable_emscripten="no"])
 
