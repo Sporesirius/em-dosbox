@@ -570,7 +570,12 @@ static void receivePacket(Bit8u *buffer, Bit16s bufSize) {
 	ECBClass *useECB;
 	ECBClass *nextECB;
 	Bit16u *bufword = (Bit16u *)buffer;
+// Emscripten requires data alignment which isn't garunteed with direct access
+#if defined(EMSCRIPTEN)
+	Bit16u useSocket = SDLNet_Read16(buffer+16);
+#else
 	Bit16u useSocket = swapByte(bufword[8]);
+#endif
 	IPXHeader * tmpHeader;
 	tmpHeader = (IPXHeader *)buffer;
 #if defined(EMSCRIPTEN)
@@ -812,9 +817,10 @@ bool ConnectToServer(char const *strAddr) {
 
 						return false;
 					}
-					CALLBACK_Idle();
 #if defined(EMSCRIPTEN) && defined(EMTERPRETER_SYNC)
-					emscripten_sleep(1);
+					emscripten_sleep_with_yield(100);
+#else
+					CALLBACK_Idle();
 #endif
 					result = SDLNet_UDP_Recv(ipxClientSocket, &regPacket);
 					if (result != 0) {
@@ -1052,9 +1058,10 @@ public:
 				pingSend();
 				ticks = GetTicks();
 				while((GetTicks() - ticks) < 1500) {
-					CALLBACK_Idle();
 #if defined(EMSCRIPTEN) && defined(EMTERPRETER_SYNC)
-					emscripten_sleep(1);
+					emscripten_sleep_with_yield(100);
+#else
+					CALLBACK_Idle();
 #endif
 					if(pingCheck(&pingHead)) {
 						WriteOut("Response from %d.%d.%d.%d, port %d time=%dms\n", CONVIP(pingHead.src.addr.byIP.host), SDLNet_Read16(&pingHead.src.addr.byIP.port), GetTicks() - ticks);
